@@ -1,0 +1,26 @@
+{
+  "name": "git-time-machine",
+  "version": "1.0.0",
+  "description": "Great Scott! This repo lets you send Git commits back in time 🕒🚗",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/losttox/git-time-machine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/losttox/git-time-machine/issues"
+  },
+  "homepage": "https://github.com/losttox/git-time-machine#readme",
+  "dependencies": {
+    "jsonfile": "^6.2.0",
+    "moment": "^2.30.1",
+    "simple-git": "^3.30.0"
+  }
+}
