@@ -4,6 +4,8 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const simpleGit = require("simple-git");
 
+let cancelCommitRun = false;
+
 const createWindow = () => {
     const win = new BrowserWindow({
         width: 900,
@@ -128,17 +130,6 @@ ipcMain.handle("resolve-repo-path", async (_event, { root, repoName }) => {
     return null;
 });
 
-ipcMain.handle("get-current-repo", async () => {
-    const cwd = process.cwd();
-    const gitPath = path.join(cwd, ".git");
-    
-    if (fs.existsSync(gitPath)) {
-        return cwd;
-    }
-    
-    return null;
-});
-
 ipcMain.handle("load-github-contribs", async (_event, { token, year }) => {
     if (!token) {
         throw new Error("GitHub token is required.");
@@ -235,6 +226,11 @@ ipcMain.handle("load-github-years", async (_event, { token }) => {
     return data.data.viewer.contributionsCollection.contributionYears || [];
 });
 
+
+ipcMain.handle("cancel-commits", async () => {
+    cancelCommitRun = true;
+    return { ok: true };
+});
 ipcMain.handle("load-contribs", async (_event, { repoPath, year }) => {
     if (!repoPath) {
         throw new Error("Repo path is required.");
@@ -273,12 +269,16 @@ ipcMain.handle("run-commits", async (event, { repoPath, plan, pushAfter }) => {
     const targetFile = path.join(repoPath, ".git-time-machine.json");
 
     let total = 0;
+    cancelCommitRun = false;
     for (const entry of plan) {
         if (!entry || !entry.date || !entry.count) {
             continue;
         }
 
         for (let i = 0; i < entry.count; i += 1) {
+            if (cancelCommitRun) {
+                return { total, cancelled: true };
+            }
             const baseDate = new Date(`${entry.date}T12:00:00`);
             const commitDate = new Date(baseDate.getTime() + i * 60000);
             const isoDate = commitDate.toISOString();
@@ -300,6 +300,9 @@ ipcMain.handle("run-commits", async (event, { repoPath, plan, pushAfter }) => {
         }
     }
 
+    if (cancelCommitRun) {
+        return { total, cancelled: true };
+    }
     if (pushAfter) {
         await git.push();
     }

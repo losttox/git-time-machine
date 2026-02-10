@@ -310,6 +310,12 @@ body {
     transform: translateX(2px);
 }
 
+.repo-card.selected {
+    background: rgba(88, 166, 255, 0.18);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.45);
+}
+
 .repo-card strong {
     display: block;
     font-size: 10px;
@@ -466,15 +472,29 @@ body {
     font-size: 9px;
     color: var(--accent-2);
 }
+
+.log-output {
+    margin-top: 6px;
+    padding: 6px;
+    min-height: 70px;
+    max-height: 140px;
+    overflow-y: auto;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 9px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+}
 `;
 
-const levelToCount = [0, 1, 2, 5, 10];
+const levelToCount = [0, 1, 2, 3, 5];
 
 const countToLevel = (count) => {
     if (count <= 0) return 0;
-    if (count <= 2) return 1;
-    if (count <= 5) return 2;
-    if (count <= 9) return 3;
+    if (count <= 1) return 1;
+    if (count <= 2) return 2;
+    if (count <= 4) return 3;
     return 4;
 };
 
@@ -485,10 +505,13 @@ const state = {
     repoPath: "",
     year: new Date().getFullYear(),
     availableYears: [],
+    githubCountsByYear: {},
+    githubLoaded: false,
     days: [],
     existingCounts: {},
     desiredCounts: {},
-    selectedDate: null
+    selectedDate: null,
+    isRunning: false
 };
 
 const injectStyles = () => {
@@ -550,17 +573,13 @@ const buildUI = () => {
     heroLeft.append(el("p", { id: "repoMeta", text: "Where new commits will be written." }));
 
     const pathPicker = el("div", { className: "path-picker" });
-    const rootLabel = el("label", { className: "field" });
-    rootLabel.append(el("span", { text: "Local root folder" }));
-    const rootRow = el("div", { className: "row" });
-    rootRow.append(el("input", { id: "rootInput", type: "text", placeholder: "C:\\Users\\DELL\\Desktop\\Work\\GitHubRepos" }));
-    rootRow.append(el("button", { id: "browseRoot", className: "btn ghost", text: "Browse" }));
-    rootLabel.append(rootRow);
-
     const pathLabel = el("label", { className: "field" });
-    pathLabel.append(el("span", { text: "Resolved repo path" }));
-    pathLabel.append(el("input", { id: "repoPath", type: "text", placeholder: "Select a repo" }));
-    pathPicker.append(rootLabel, pathLabel);
+    pathLabel.append(el("span", { text: "Commit target (git repo)" }));
+    const pathRow = el("div", { className: "row" });
+    pathRow.append(el("input", { id: "repoPath", type: "text", placeholder: "Click Browse Repo to select" }));
+    pathRow.append(el("button", { id: "browseRepo", className: "btn ghost", text: "Browse Repo" }));
+    pathLabel.append(pathRow);
+    pathPicker.append(pathLabel);
 
     hero.append(heroLeft, pathPicker);
 
@@ -622,7 +641,7 @@ const buildUI = () => {
     const actionRow = el("div", { className: "row" });
     actionRow.append(el("button", { id: "previewPlan", className: "btn ghost", text: "Preview Plan" }));
     actionRow.append(el("button", { id: "runPlan", className: "btn primary", text: "Run Commits" }));
-    planBlock.append(pushLabel, actionRow, el("div", { id: "progress", className: "progress" }));
+    planBlock.append(pushLabel, actionRow, el("div", { id: "progress", className: "progress" }), el("div", { id: "logOutput", className: "log-output" }));
 
     controls.append(selectedBlock, planBlock);
 
@@ -640,8 +659,7 @@ const elements = {
     repoSearch: document.getElementById("repoSearch"),
     repoList: document.getElementById("repoList"),
     repoMeta: document.getElementById("repoMeta"),
-    rootInput: document.getElementById("rootInput"),
-    browseRoot: document.getElementById("browseRoot"),
+    browseRepo: document.getElementById("browseRepo"),
     repoPath: document.getElementById("repoPath"),
     yearSelect: document.getElementById("yearSelect"),
     loadExisting: document.getElementById("loadExisting"),
@@ -652,7 +670,8 @@ const elements = {
     previewPlan: document.getElementById("previewPlan"),
     runPlan: document.getElementById("runPlan"),
     pushAfter: document.getElementById("pushAfter"),
-    progress: document.getElementById("progress")
+    progress: document.getElementById("progress"),
+    logOutput: document.getElementById("logOutput")
 };
 
 const formatDateLabel = (dateStr) => {
@@ -716,6 +735,9 @@ const renderRepoList = () => {
     filtered.forEach((repo) => {
         const card = document.createElement("button");
         card.className = "repo-card";
+        if (state.selectedRepo && state.selectedRepo.fullName === repo.fullName) {
+            card.classList.add("selected");
+        }
         card.type = "button";
         card.innerHTML = `
             <div>
@@ -733,20 +755,8 @@ const renderRepoList = () => {
 const selectRepo = async (repo) => {
     state.selectedRepo = repo;
     elements.repoMeta.textContent = `${repo.fullName} • ${repo.defaultBranch}`;
-
-    if (state.rootPath) {
-        const resolved = await api.resolveRepoPath(state.rootPath, repo.name);
-        if (resolved) {
-            state.repoPath = resolved;
-            elements.repoPath.value = resolved;
-        } else {
-            state.repoPath = "";
-            elements.repoPath.value = "";
-            elements.repoPath.placeholder = `Not found in ${state.rootPath}`;
-        }
-    } else {
-        elements.repoPath.placeholder = "Set root folder first";
-    }
+    elements.repoPath.placeholder = "Click Browse Repo to select";
+    renderRepoList();
 };
 
 const renderCalendar = () => {
@@ -844,6 +854,16 @@ const updateSummary = () => {
     } else {
         elements.planSummary.textContent = `${total} commits across ${plan.length} days.`;
     }
+};
+
+const appendLog = (message) => {
+    const target = elements.logOutput;
+    if (!target) {
+        return;
+    }
+    const stamp = new Date().toLocaleTimeString();
+    target.textContent += `[${stamp}] ${message}\n`;
+    target.scrollTop = target.scrollHeight;
 };
 
 const buildPlan = () => {
@@ -986,10 +1006,17 @@ const loadExisting = async () => {
         if (state.availableYears.length === 0) {
             await loadAvailableYears(token);
         }
-        state.existingCounts = await api.loadGithubContribs(token, state.year);
-        
+        if (!state.githubLoaded) {
+            state.githubCountsByYear = {};
+            for (const year of state.availableYears) {
+                elements.loadExisting.textContent = `Loading ${year}...`;
+                const counts = await api.loadGithubContribs(token, year);
+                state.githubCountsByYear[year] = counts || {};
+            }
+            state.githubLoaded = true;
+        }
+        state.existingCounts = state.githubCountsByYear[state.year] || {};
         state.desiredCounts = { ...state.existingCounts };
-        
         refreshCalendarState();
         elements.repoMeta.textContent = `Loaded ${state.year} contributions from GitHub profile`;
     } catch (error) {
@@ -1012,6 +1039,18 @@ const previewPlan = () => {
 };
 
 const runPlan = async () => {
+    if (state.isRunning) {
+        elements.runPlan.disabled = true;
+        elements.runPlan.textContent = "Stopping...";
+        appendLog("Stop requested");
+        try {
+            await api.cancelCommits();
+        } catch (error) {
+            appendLog(error.message || "Stop request failed");
+        }
+        return;
+    }
+
     if (!state.repoPath) {
         alert("No git repository detected. Either:\n1. Run this from a git repo folder, or\n2. Set a local root folder and select a repo");
         return;
@@ -1027,36 +1066,42 @@ const runPlan = async () => {
         return;
     }
 
-    elements.runPlan.disabled = true;
+    state.isRunning = true;
+    elements.runPlan.disabled = false;
+    elements.runPlan.textContent = "Stop Committing";
     elements.progress.textContent = "Starting...";
+    elements.logOutput.textContent = "";
+    appendLog(`Run started for ${plan.length} days`);
 
     api.onCommitProgress((payload) => {
         elements.progress.textContent = `Committed ${payload.total} (last: ${payload.date} #${payload.index})`;
+        appendLog(`Committed ${payload.total} (last: ${payload.date} #${payload.index})`);
     });
 
     try {
         const result = await api.runCommits(state.repoPath, plan, elements.pushAfter.checked);
-        elements.progress.textContent = `Done. ${result.total} commits created.`;
+        if (result && result.cancelled) {
+            elements.progress.textContent = `Stopped. ${result.total} commits created.`;
+            appendLog(`Stopped after ${result.total} commits`);
+        } else {
+            elements.progress.textContent = `Done. ${result.total} commits created.`;
+            appendLog(`Done. ${result.total} commits created.`);
+        }
         await loadExisting();
     } catch (error) {
         elements.progress.textContent = "";
+        appendLog(error.message || "Commit run failed");
         alert(error.message || "Commit run failed.");
     } finally {
+        state.isRunning = false;
         elements.runPlan.disabled = false;
+        elements.runPlan.textContent = "Run Commits";
     }
 };
 
 const init = async () => {
     initYearSelect();
     refreshCalendarState();
-
-    const currentRepo = await api.getCurrentRepo();
-    if (currentRepo) {
-        state.repoPath = currentRepo;
-        elements.repoPath.value = currentRepo;
-        const repoName = currentRepo.split(/[/\\]/).pop();
-        elements.repoMeta.textContent = `Target: ${repoName} (commits will be added here)`;
-    }
 
     elements.tokenInput.addEventListener("change", async () => {
         await loadAvailableYears(elements.tokenInput.value.trim());
@@ -1078,36 +1123,22 @@ const init = async () => {
 
     elements.repoSearch.addEventListener("input", renderRepoList);
 
-    elements.browseRoot.addEventListener("click", async () => {
+    elements.browseRepo.addEventListener("click", async () => {
+        if (!state.selectedRepo) {
+            alert("Select a repo from the list first.");
+            return;
+        }
         const folder = await api.pickFolder();
         if (folder) {
-            state.rootPath = folder;
-            elements.rootInput.value = folder;
-            if (state.selectedRepo) {
-                const resolved = await api.resolveRepoPath(folder, state.selectedRepo.name);
-                if (resolved) {
-                    state.repoPath = resolved;
-                    elements.repoPath.value = resolved;
-                } else {
-                    state.repoPath = "";
-                    elements.repoPath.value = "";
-                    elements.repoPath.placeholder = `${state.selectedRepo.name} not found here`;
-                }
-            }
-        }
-    });
-
-    elements.rootInput.addEventListener("change", async (event) => {
-        state.rootPath = event.target.value.trim();
-        if (state.selectedRepo && state.rootPath) {
-            const resolved = await api.resolveRepoPath(state.rootPath, state.selectedRepo.name);
+            const repoName = folder.split(/[/\\]/).pop();
+            const parentFolder = folder.substring(0, folder.lastIndexOf(repoName));
+            const resolved = await api.resolveRepoPath(parentFolder, repoName);
             if (resolved) {
                 state.repoPath = resolved;
                 elements.repoPath.value = resolved;
+                elements.repoPath.placeholder = "Click Browse Repo to select";
             } else {
-                state.repoPath = "";
-                elements.repoPath.value = "";
-                elements.repoPath.placeholder = `${state.selectedRepo.name} not found here`;
+                alert("Selected folder is not a git repository (no .git folder found)");
             }
         }
     });
@@ -1116,8 +1147,28 @@ const init = async () => {
         state.repoPath = event.target.value.trim();
     });
 
-    elements.yearSelect.addEventListener("change", () => {
+    elements.yearSelect.addEventListener("change", async () => {
         state.year = Number(elements.yearSelect.value);
+        if (state.githubLoaded) {
+            const cached = state.githubCountsByYear[state.year];
+            if (cached) {
+                state.existingCounts = cached;
+                refreshCalendarState();
+                elements.repoMeta.textContent = `Loaded ${state.year} contributions from GitHub profile`;
+                return;
+            }
+            const token = elements.tokenInput.value.trim();
+            if (token) {
+                elements.loadExisting.textContent = `Loading ${state.year}...`;
+                const counts = await api.loadGithubContribs(token, state.year);
+                state.githubCountsByYear[state.year] = counts || {};
+                state.existingCounts = state.githubCountsByYear[state.year];
+                refreshCalendarState();
+                elements.repoMeta.textContent = `Loaded ${state.year} contributions from GitHub profile`;
+                elements.loadExisting.textContent = "Load from GitHub";
+                return;
+            }
+        }
         state.existingCounts = {};
         refreshCalendarState();
     });
