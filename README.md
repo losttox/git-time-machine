@@ -17,18 +17,29 @@ Design and manipulate your GitHub contribution history with precision. Create re
    - Option A: Clone with git: `git clone https://github.com/losttox/git-time-machine.git`
    - Option B: Download ZIP from GitHub and extract it
 
-2. **Open a terminal** in the project folder:
-   - Windows: Right-click folder → "Open in Terminal" or press `Shift+Right-click` → "Open PowerShell window here"
-   - Mac/Linux: Navigate to folder in Terminal
-
-3. **Install dependencies** (first time only):
+2. **Launch the app**:
+   
+   ### Easy Way (Recommended):
+   Just **double-click** the startup script:
+   - **Windows**: Double-click `start.bat`
+   - **Mac/Linux**: Double-click `start.sh` (or run `./start.sh` in terminal)
+   
+   The script automatically:
+   - ✅ Checks if Node.js is installed
+   - ✅ Installs dependencies (first time only)
+   - ✅ Launches the app
+   
+   ### Manual Way:
+   Open a terminal in the project folder and run:
    ```bash
-   npm install
+   npm install    # First time only
+   npm run gui    # Start the app
    ```
-
-4. **Launch the app** (opens as a desktop window):
+   
+   **Note for Mac/Linux users**: If the script won't run, make it executable first:
    ```bash
-   npm run gui
+   chmod +x start.sh
+   ./start.sh
    ```
 
 ## Getting Your GitHub Token
