@@ -752,7 +752,6 @@ const selectRepo = async (repo) => {
 const renderCalendar = () => {
     elements.calendarGrid.innerHTML = "";
 
-    // Add day of week labels on the left (Sun, Mon, Tue, Wed, Thu, Fri, Sat)
     const dayLabels = ["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     dayLabels.forEach((label, index) => {
         const labelCell = document.createElement("div");
@@ -763,7 +762,6 @@ const renderCalendar = () => {
         elements.calendarGrid.appendChild(labelCell);
     });
 
-    // Add month labels on top
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const monthStarts = {};
     
@@ -787,7 +785,6 @@ const renderCalendar = () => {
         elements.calendarGrid.appendChild(monthLabel);
     });
 
-    // Add calendar cells
     state.days.forEach((day) => {
         const existing = getExistingCount(day.date);
         const desired = getDesiredCount(day.date);
@@ -991,7 +988,6 @@ const loadExisting = async () => {
         }
         state.existingCounts = await api.loadGithubContribs(token, state.year);
         
-        // Initialize desiredCounts to match existing counts
         state.desiredCounts = { ...state.existingCounts };
         
         refreshCalendarState();
@@ -1054,7 +1050,6 @@ const init = async () => {
     initYearSelect();
     refreshCalendarState();
 
-    // Auto-detect current repo for commit target
     const currentRepo = await api.getCurrentRepo();
     if (currentRepo) {
         state.repoPath = currentRepo;
