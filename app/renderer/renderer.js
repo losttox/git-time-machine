@@ -762,8 +762,17 @@ const renderCalendar = () => {
 
         cell.addEventListener("click", () => {
             state.selectedDate = day.date;
-            const nextLevel = (desiredLevel + 1) % 5;
-            setDesiredCount(day.date, levelToCount[nextLevel]);
+            const currentDesired = getDesiredCount(day.date);
+            setDesiredCount(day.date, currentDesired + 1);
+            updateSelected();
+            renderCalendar();
+            updateSummary();
+        });
+
+        cell.addEventListener("dblclick", () => {
+            state.selectedDate = day.date;
+            const currentDesired = getDesiredCount(day.date);
+            setDesiredCount(day.date, currentDesired + 1);
             updateSelected();
             renderCalendar();
             updateSummary();
