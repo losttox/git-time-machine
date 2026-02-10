@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git Time Machine</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">GTM</div>
+                <div>
+                    <h1>Git Time Machine</h1>
+                    <p>Design contribution patterns, then commit with precision.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>GitHub Access</h2>
+                <label class="field">
+                    <span>Token</span>
+                    <input id="tokenInput" type="password" placeholder="ghp_..." />
+                </label>
+                <button id="loadRepos" class="btn primary">Load Repos</button>
+            </div>
+            <div class="panel">
+                <h2>Repos</h2>
+                <input id="repoSearch" class="search" type="text" placeholder="Search repositories" />
+                <div id="repoList" class="repo-list"></div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <section class="panel hero">
+                <div>
+                    <h2>Target Repo</h2>
+                    <p id="repoMeta">Pick a repository to begin.</p>
+                </div>
+                <div class="path-picker">
+                    <label class="field">
+                        <span>Local root folder</span>
+                        <div class="row">
+                            <input id="rootInput" type="text" placeholder="C:\\Users\\DELL\\Desktop\\Work\\GitHubRepos" />
+                            <button id="browseRoot" class="btn ghost">Browse</button>
+                        </div>
+                    </label>
+                    <label class="field">
+                        <span>Resolved repo path</span>
+                        <input id="repoPath" type="text" placeholder="Select a repo" />
+                    </label>
+                </div>
+            </section>
+
+            <section class="panel grid-panel">
+                <div class="grid-header">
+                    <div>
+                        <h2>Contribution Canvas</h2>
+                        <p>Click squares to set your desired commit intensity.</p>
+                    </div>
+                    <div class="grid-actions">
+                        <label class="field inline">
+                            <span>Year</span>
+                            <select id="yearSelect"></select>
+                        </label>
+                        <button id="loadExisting" class="btn ghost">Load Existing</button>
+                    </div>
+                </div>
+
+                <div class="pattern-bar">
+                    <span>Patterns</span>
+                    <button class="btn chip" data-pattern="clear">Clear</button>
+                    <button class="btn chip" data-pattern="diagonal">Diagonal</button>
+                    <button class="btn chip" data-pattern="wave">Wave</button>
+                    <button class="btn chip" data-pattern="smile">Smile</button>
+                    <button class="btn chip" data-pattern="blocks">Blocks</button>
+                </div>
+
+                <div class="grid-wrap">
+                    <div id="calendarGrid" class="calendar"></div>
+                </div>
+
+                <div class="legend">
+                    <span>Less</span>
+                    <div class="legend-squares">
+                        <span class="cell lvl-0"></span>
+                        <span class="cell lvl-1"></span>
+                        <span class="cell lvl-2"></span>
+                        <span class="cell lvl-3"></span>
+                        <span class="cell lvl-4"></span>
+                    </div>
+                    <span>More</span>
+                </div>
+            </section>
+
+            <section class="panel controls">
+                <div class="control-block">
+                    <h2>Selected Day</h2>
+                    <p id="selectedDate">No day selected.</p>
+                    <label class="field inline">
+                        <span>Desired commits</span>
+                        <input id="selectedCount" type="number" min="0" max="50" value="0" />
+                    </label>
+                </div>
+                <div class="control-block">
+                    <h2>Plan Summary</h2>
+                    <p id="planSummary">No plan yet.</p>
+                    <label class="field inline">
+                        <span>Push after run</span>
+                        <input id="pushAfter" type="checkbox" />
+                    </label>
+                    <div class="row">
+                        <button id="previewPlan" class="btn ghost">Preview Plan</button>
+                        <button id="runPlan" class="btn primary">Run Commits</button>
+                    </div>
+                    <div id="progress" class="progress"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
