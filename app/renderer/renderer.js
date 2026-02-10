@@ -448,6 +448,29 @@ body {
     color: var(--accent);
 }
 
+.text-pattern-input {
+    padding: 4px 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 9px;
+    font-weight: 500;
+    width: 120px;
+    transition: all 0.15s ease;
+}
+
+.text-pattern-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--card-2);
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+.text-pattern-input::placeholder {
+    color: var(--muted);
+}
+
 .grid-wrap {
     overflow-x: auto;
     padding-bottom: 4px;
@@ -675,7 +698,8 @@ const buildUI = () => {
     const patternBar = el("div", { className: "pattern-bar" });
     const patternBtn = el("button", { id: "patternMenuBtn", className: "btn ghost", text: "Patterns" });
     const clearBtn = el("button", { id: "clearPatternBtn", className: "btn ghost", text: "Clear" });
-    patternBar.append(patternBtn, clearBtn);
+    const textInput = el("input", { id: "textPatternInput", type: "text", placeholder: "Type text to draw...", className: "text-pattern-input" });
+    patternBar.append(patternBtn, clearBtn, textInput);
     
     const patternMenu = el("div", { id: "patternMenu", className: "pattern-menu" });
     const smartSection = el("div", { className: "pattern-section" });
@@ -983,6 +1007,72 @@ const buildPlan = () => {
         }
     });
     return plan;
+};
+
+const letters = {
+    'A': [[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1]],
+    'B': [[1,1,1,0],[1,0,0,1],[1,1,1,0],[1,0,0,1],[1,1,1,0]],
+    'C': [[0,1,1,1],[1,0,0,0],[1,0,0,0],[1,0,0,0],[0,1,1,1]],
+    'D': [[1,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,0]],
+    'E': [[1,1,1,1],[1,0,0,0],[1,1,1,0],[1,0,0,0],[1,1,1,1]],
+    'F': [[1,1,1,1],[1,0,0,0],[1,1,1,0],[1,0,0,0],[1,0,0,0]],
+    'G': [[0,1,1,1],[1,0,0,0],[1,0,1,1],[1,0,0,1],[0,1,1,0]],
+    'H': [[1,0,0,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1]],
+    'I': [[0,1,1,1],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,1]],
+    'J': [[1,1,1,1],[0,0,1,0],[0,0,1,0],[1,0,1,0],[0,1,1,0]],
+    'K': [[1,0,0,1],[1,0,1,0],[1,1,0,0],[1,0,1,0],[1,0,0,1]],
+    'L': [[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,1,1,1]],
+    'M': [[1,0,0,0,1],[1,1,0,1,1],[1,0,1,0,1],[1,0,0,0,1],[1,0,0,0,1]],
+    'N': [[1,0,0,1],[1,1,0,1],[1,0,1,1],[1,0,0,1],[1,0,0,1]],
+    'O': [[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+    'P': [[1,1,1,0],[1,0,0,1],[1,1,1,0],[1,0,0,0],[1,0,0,0]],
+    'Q': [[0,1,1,0],[1,0,0,1],[1,0,0,1],[0,1,1,0],[0,0,0,1]],
+    'R': [[1,1,1,0],[1,0,0,1],[1,1,1,0],[1,0,1,0],[1,0,0,1]],
+    'S': [[0,1,1,1],[1,0,0,0],[0,1,1,0],[0,0,0,1],[1,1,1,0]],
+    'T': [[1,1,1,1],[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0]],
+    'U': [[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+    'V': [[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,0,1],[0,0,1,0]],
+    'W': [[1,0,0,0,1],[1,0,0,0,1],[1,0,1,0,1],[1,1,0,1,1],[1,0,0,0,1]],
+    'X': [[1,0,0,1],[1,0,0,1],[0,1,1,0],[1,0,0,1],[1,0,0,1]],
+    'Y': [[1,0,0,1],[1,0,0,1],[0,1,1,0],[0,0,1,0],[0,0,1,0]],
+    'Z': [[1,1,1,1],[0,0,1,0],[0,1,0,0],[1,0,0,0],[1,1,1,1]],
+    '0': [[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]],
+    '1': [[0,0,1,0],[0,1,1,0],[0,0,1,0],[0,0,1,0],[0,1,1,1]],
+    '2': [[0,1,1,0],[1,0,0,1],[0,0,1,0],[0,1,0,0],[1,1,1,1]],
+    '3': [[0,1,1,0],[1,0,0,1],[0,1,1,0],[1,0,0,1],[0,1,1,0]],
+    '4': [[1,0,0,1],[1,0,0,1],[1,1,1,1],[0,0,0,1],[0,0,0,1]],
+    '5': [[1,1,1,1],[1,0,0,0],[1,1,1,0],[0,0,0,1],[1,1,1,0]],
+    ' ': [[0,0],[0,0],[0,0],[0,0],[0,0]]
+};
+
+const applyTextPattern = (text) => {
+    const desired = { ...state.desiredCounts };
+    let startWeek = 2;
+    const textUpper = text.toUpperCase();
+    
+    for (const char of textUpper) {
+        const pattern = letters[char];
+        if (!pattern) continue;
+        
+        const cols = pattern[0].length;
+        if (startWeek + cols > 52) break;
+        
+        state.days.forEach((day) => {
+            if (day.weekIndex >= startWeek && day.weekIndex < startWeek + cols) {
+                const colIndex = day.weekIndex - startWeek;
+                const rowIndex = day.dayOfWeek;
+                if (pattern[rowIndex] && pattern[rowIndex][colIndex]) {
+                    desired[day.date] = Math.max((desired[day.date] || 0), [4, 5, 6][Math.floor(Math.random() * 3)]);
+                }
+            }
+        });
+        
+        startWeek += cols + 1;
+    }
+    
+    state.desiredCounts = desired;
+    renderCalendar();
+    updateSummary();
 };
 
 const applyPattern = (pattern) => {
@@ -1464,6 +1554,21 @@ const init = async () => {
         selectedPatternButton = null;
         selectedCategory = null;
         applyPattern("clear");
+    });
+    
+    const textPatternInput = document.getElementById("textPatternInput");
+    textPatternInput.addEventListener("input", (e) => {
+        const text = e.target.value.trim();
+        if (text.length > 0) {
+            if (selectedPatternButton) {
+                selectedPatternButton.classList.remove("selected");
+            }
+            selectedPatternButton = null;
+            selectedCategory = null;
+            applyTextPattern(text);
+        } else {
+            applyPattern("clear");
+        }
     });
     
     document.querySelectorAll("[data-pattern]").forEach((button) => {
