@@ -6,22 +6,27 @@ Design and manipulate your GitHub contribution history with precision. Create re
 
 - **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
 - **Git** installed and configured
+- **A terminal/command prompt** (PowerShell, CMD, Terminal, etc.) - **No VS Code required!**
 - **A GitHub Personal Access Token** (Classic) with `repo` and `user` scopes - [Create here](https://github.com/settings/tokens)
+
+**Note**: This is a standalone desktop application. You don't need VS Code or any IDE - just run the commands in any terminal.
 
 ## Installation
 
-1. Clone or download this repository:
-   ```bash
-   git clone https://github.com/losttox/git-time-machine.git
-   cd git-time-machine
-   ```
+1. **Download** the repository:
+   - Option A: Clone with git: `git clone https://github.com/losttox/git-time-machine.git`
+   - Option B: Download ZIP from GitHub and extract it
 
-2. Install dependencies:
+2. **Open a terminal** in the project folder:
+   - Windows: Right-click folder → "Open in Terminal" or press `Shift+Right-click` → "Open PowerShell window here"
+   - Mac/Linux: Navigate to folder in Terminal
+
+3. **Install dependencies** (first time only):
    ```bash
    npm install
    ```
 
-3. Start the Electron GUI:
+4. **Launch the app** (opens as a desktop window):
    ```bash
    npm run gui
    ```
@@ -37,13 +42,31 @@ To use this tool, you'll need a GitHub Personal Access Token:
 5. **Copy it immediately** - GitHub won't show it again
 6. Paste it into the "Token" field in the app
 
+## Before You Start
+
+**Important**: You need to have your target repository **already cloned locally** on your computer before using this tool.
+
+For example, if you want to add commits to your `awesome-project` repository:
+
+1. **Clone it first** (if you haven't already):
+   ```bash
+   git clone https://github.com/yourusername/awesome-project.git
+   ```
+   Or download it and navigate to it in terminal, then run `git init` if needed.
+
+2. **Remember the folder location** - you'll need to point the app to this folder using the "Browse Repo" button
+
+The app works by modifying the git history in your **local repository folder**. It doesn't connect to GitHub directly to write commits - it creates commits locally, and then you can push them to GitHub.
+
 ## How to Use
 
 ### Step 1: Load Your Repositories
 1. Enter your GitHub token in the "Token" field
-2. Click "Load Repos"
+2. Click "Load Repos" - this lists your GitHub repos so you can view contribution data
 3. Select your target repository from the list
-4. Click "Browse Repo" to select the local folder containing your repo
+4. Click "Browse Repo" and **navigate to the local folder** where you cloned that repository
+   - Example: `C:\Users\YourName\Documents\awesome-project`
+   - The folder should contain a `.git` folder
 
 ### Step 2: Load Current Contributions (Optional)
 1. Select the year you want to work with
@@ -101,6 +124,7 @@ Type any word or text to render it as **pixel art** on your contribution graph:
 
 ## Important Notes ⚠️
 
+- **Local Repository Required**: You must have the target repository cloned on your computer. The app modifies local git history, not GitHub directly
 - **Backups First**: Always back up your repository before using this tool
 - **History Rewriting**: This tool rewrites git history. Use on a branch or clone if unsure
 - **GitHub API Limits**: Respect GitHub's rate limits when loading contribution data
@@ -138,7 +162,9 @@ Type any word or text to render it as **pixel art** on your contribution graph:
 - **Repos not loading**: Ensure token has `repo` scope
 
 ### Git Issues
-- **"Not a git repository"**: Make sure you browse to the correct local repo folder
+- **"Not a git repository"**: Make sure you browse to the correct local repo folder (should contain a `.git` folder)
+- **"Repository not found"**: Clone the repository first using `git clone` before using the app
+- **Can't find my repo**: The app modifies LOCAL repositories on your computer, not remote GitHub repos directly
 - **Commits not pushing**: Check that "Push after run" is enabled and token has `repo` scope
 
 ### Pattern Issues
