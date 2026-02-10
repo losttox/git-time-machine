@@ -56,7 +56,7 @@ To use this tool, you'll need a GitHub Personal Access Token:
 ## Before You Start
 
 **Important**: You need to have your target repository **already cloned locally** on your computer before using this tool.
-
+**Create REPO** - make sure you create a repo to any name and put it as private + enable README, make sure you also enable private contribution graph in your profile so it can be seen after commits.
 For example, if you want to add commits to your `awesome-project` repository:
 
 1. **Clone it first** (if you haven't already):
