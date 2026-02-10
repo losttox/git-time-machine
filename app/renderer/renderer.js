@@ -386,10 +386,29 @@ body {
 
 .calendar {
     display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(7, 10px);
-    grid-auto-columns: 10px;
+    grid-template-rows: 14px repeat(7, 10px);
+    grid-template-columns: 30px repeat(53, 10px);
     gap: 2px;
+    padding: 4px;
+}
+
+.day-label {
+    font-size: 8px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4px;
+    text-align: right;
+}
+
+.month-label {
+    font-size: 8px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 2px;
 }
 
 .cell {
@@ -733,6 +752,42 @@ const selectRepo = async (repo) => {
 const renderCalendar = () => {
     elements.calendarGrid.innerHTML = "";
 
+    // Add day of week labels on the left (Sun, Mon, Tue, Wed, Thu, Fri, Sat)
+    const dayLabels = ["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    dayLabels.forEach((label, index) => {
+        const labelCell = document.createElement("div");
+        labelCell.className = "day-label";
+        labelCell.textContent = label;
+        labelCell.style.gridRow = `${index + 1}`;
+        labelCell.style.gridColumn = "1";
+        elements.calendarGrid.appendChild(labelCell);
+    });
+
+    // Add month labels on top
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthStarts = {};
+    
+    state.days.forEach((day) => {
+        const date = new Date(`${day.date}T00:00:00`);
+        const month = date.getMonth();
+        const key = `${state.year}-${month}`;
+        
+        if (!monthStarts[key]) {
+            monthStarts[key] = day.weekIndex;
+        }
+    });
+
+    Object.entries(monthStarts).forEach(([key, weekIndex]) => {
+        const month = parseInt(key.split("-")[1]);
+        const monthLabel = document.createElement("div");
+        monthLabel.className = "month-label";
+        monthLabel.textContent = months[month];
+        monthLabel.style.gridColumn = `${weekIndex + 2}`;
+        monthLabel.style.gridRow = "1";
+        elements.calendarGrid.appendChild(monthLabel);
+    });
+
+    // Add calendar cells
     state.days.forEach((day) => {
         const existing = getExistingCount(day.date);
         const desired = getDesiredCount(day.date);
@@ -740,21 +795,12 @@ const renderCalendar = () => {
         const existingLevel = countToLevel(existing);
 
         const cell = document.createElement("div");
-        
-        // In remove mode, show desired level with special styling for marked days
         cell.className = `cell lvl-${desiredLevel}`;
         cell.dataset.date = day.date;
         cell.dataset.existingLevel = String(existingLevel);
-        cell.style.gridColumn = `${day.weekIndex + 1}`;
-        cell.style.gridRow = `${day.dayOfWeek + 1}`;
-        
-        // Add visual indicator for days marked for removal
-        if (state.mode === "remove" && existing > 0 && desired === 0) {
-            cell.style.border = "2px solid #f85149";
-            cell.style.opacity = "0.5";
-        }
-        
-        cell.title = `${formatDateLabel(day.date)}\nExisting: ${existing}\nDesired: ${desired}${state.mode === "remove" && existing > desired ? "\n⚠️ Marked for removal" : ""}`;
+        cell.style.gridColumn = `${day.weekIndex + 2}`;
+        cell.style.gridRow = `${day.dayOfWeek + 2}`;
+        cell.title = `${formatDateLabel(day.date)}\nExisting: ${existing}\nDesired: ${desired}`;
 
         if (state.selectedDate === day.date) {
             cell.classList.add("selected");
