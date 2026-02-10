@@ -125,6 +125,7 @@ Type any word or text to render it as **pixel art** on your contribution graph:
 ## Important Notes ⚠️
 
 - **Local Repository Required**: You must have the target repository cloned on your computer. The app modifies local git history, not GitHub directly
+- **⚠️ Permanent Changes**: Once commits are pushed to GitHub, you can't easily undo them. To completely remove them from your contribution graph, you'll need to delete and recreate the repository
 - **Backups First**: Always back up your repository before using this tool
 - **History Rewriting**: This tool rewrites git history. Use on a branch or clone if unsure
 - **GitHub API Limits**: Respect GitHub's rate limits when loading contribution data
@@ -171,6 +172,28 @@ Type any word or text to render it as **pixel art** on your contribution graph:
 - **Text not rendering**: Use only A-Z, 0-9, and spaces
 - **Commits not appearing**: Wait a moment for GitHub to update, then reload
 
+## How to Undo / Remove Commits ⚠️
+
+**Important**: Once you've created commits with this tool and pushed them to GitHub, removing them requires deleting and recreating the repository.
+
+### If You Haven't Pushed Yet (Local Only)
+- Use `git reset --hard HEAD~<number>` to remove the last commits
+- Or delete the local repo folder and clone fresh from GitHub
+
+### If You've Already Pushed to GitHub
+**There's no easy undo button.** To completely remove the commits from your GitHub contribution graph:
+
+1. **Delete the repository** on GitHub (Settings → Danger Zone → Delete repository)
+2. **Create a new repository** with the same name
+3. **Push your original code** (without the fake commits)
+
+**Why?** Because the commits are now part of your GitHub contribution history. Even if you delete commits locally and force push, GitHub's contribution graph caches this data.
+
+**Prevention is key**: 
+- Always test on a test repository first
+- Use small patterns before committing to large ones
+- Keep backups before running
+
 ## Safety Tips
 
 1. **Test on a branch first**: Create a test branch before applying patterns
@@ -178,6 +201,7 @@ Type any word or text to render it as **pixel art** on your contribution graph:
 3. **Verify before pushing**: Always preview the plan first
 4. **Respect limits**: Don't create thousands of commits at once
 5. **Keep backups**: Have a git remote backup of your repo
+6. **Create a test repo**: Practice on a throwaway repository before using on your main repos
 
 ## Author
 
