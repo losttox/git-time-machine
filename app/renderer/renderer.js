@@ -268,6 +268,13 @@ body {
     color: var(--text);
 }
 
+.btn.chip.selected {
+    background: rgba(88, 166, 255, 0.18);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.45);
+    color: var(--accent);
+}
+
 .repo-list {
     display: flex;
     flex-direction: column;
@@ -370,6 +377,75 @@ body {
     flex-wrap: wrap;
     font-size: 9px;
     color: var(--muted);
+    position: relative;
+}
+
+.pattern-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 4px;
+    z-index: 100;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pattern-menu.active {
+    display: block;
+}
+
+.pattern-section {
+    margin-bottom: 8px;
+}
+
+.pattern-section:last-child {
+    margin-bottom: 0;
+}
+
+.pattern-section h3 {
+    margin: 0 0 6px 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pattern-item {
+    display: block;
+    width: 100%;
+    padding: 6px 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 9px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-bottom: 2px;
+}
+
+.pattern-item:last-child {
+    margin-bottom: 0;
+}
+
+.pattern-item:hover {
+    background: var(--card-2);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.pattern-item.selected {
+    background: rgba(88, 166, 255, 0.18);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .grid-wrap {
@@ -597,18 +673,48 @@ const buildUI = () => {
     gridHeader.append(headerText, headerActions);
 
     const patternBar = el("div", { className: "pattern-bar" });
-    patternBar.append(el("span", { text: "Patterns" }));
-    [
-        { id: "clear", label: "Clear" },
-        { id: "diagonal", label: "Diagonal" },
-        { id: "wave", label: "Wave" },
-        { id: "smile", label: "Smile" },
-        { id: "blocks", label: "Blocks" }
-    ].forEach((pattern) => {
-        const btn = el("button", { className: "btn chip", text: pattern.label });
-        btn.dataset.pattern = pattern.id;
-        patternBar.append(btn);
+    const patternBtn = el("button", { id: "patternMenuBtn", className: "btn ghost", text: "Patterns" });
+    const clearBtn = el("button", { id: "clearPatternBtn", className: "btn ghost", text: "Clear" });
+    patternBar.append(patternBtn, clearBtn);
+    
+    const patternMenu = el("div", { id: "patternMenu", className: "pattern-menu" });
+    const smartSection = el("div", { className: "pattern-section" });
+    smartSection.append(el("h3", { text: "Smart Patterns" }));
+    const smartPatterns = [
+        { id: "casual", label: "Casual", category: "smart" },
+        { id: "busy", label: "Busy", category: "smart" },
+        { id: "organic", label: "Organic", category: "smart" },
+        { id: "mild", label: "Mild", category: "smart" },
+        { id: "intense", label: "Intense", category: "smart" },
+        { id: "sporadic", label: "Sporadic", category: "smart" }
+    ];
+    smartPatterns.forEach((p) => {
+        const item = el("button", { className: "pattern-item", text: p.label });
+        item.dataset.pattern = p.id;
+        item.dataset.category = p.category;
+        smartSection.append(item);
     });
+    
+    const funSection = el("div", { className: "pattern-section" });
+    funSection.append(el("h3", { text: "Fun Patterns" }));
+    const funPatterns = [
+        { id: "diagonal", label: "Diagonal", category: "fun" },
+        { id: "wave", label: "Wave", category: "fun" },
+        { id: "smile", label: "Smile", category: "fun" },
+        { id: "blocks", label: "Blocks", category: "fun" },
+        { id: "checkerboard", label: "Checkerboard", category: "fun" },
+        { id: "gradient", label: "Gradient", category: "fun" },
+        { id: "stripes", label: "Stripes", category: "fun" }
+    ];
+    funPatterns.forEach((p) => {
+        const item = el("button", { className: "pattern-item", text: p.label });
+        item.dataset.pattern = p.id;
+        item.dataset.category = p.category;
+        funSection.append(item);
+    });
+    
+    patternMenu.append(smartSection, funSection);
+    patternBar.append(patternBtn, clearBtn, patternMenu);
 
     const gridWrap = el("div", { className: "grid-wrap" });
     gridWrap.append(el("div", { id: "calendarGrid", className: "calendar" }));
@@ -891,7 +997,8 @@ const applyPattern = (pattern) => {
     if (pattern === "diagonal") {
         state.days.forEach((day) => {
             if (day.weekIndex % 7 === day.dayOfWeek) {
-                desired[day.date] = Math.max(desired[day.date] || 0, levelToCount[3]);
+                const commits = [3, 3, 4, 5, 5, 6, 7][Math.floor(Math.random() * 7)];
+                desired[day.date] = Math.max(desired[day.date] || 0, commits);
             }
         });
     }
@@ -900,7 +1007,8 @@ const applyPattern = (pattern) => {
         state.days.forEach((day) => {
             const wave = Math.round((Math.sin(day.weekIndex / 4) + 1) * 3);
             if (day.dayOfWeek === wave) {
-                desired[day.date] = Math.max(desired[day.date] || 0, levelToCount[4]);
+                const commits = [4, 5, 5, 6, 7][Math.floor(Math.random() * 5)];
+                desired[day.date] = Math.max(desired[day.date] || 0, commits);
             }
         });
     }
@@ -908,13 +1016,16 @@ const applyPattern = (pattern) => {
     if (pattern === "smile") {
         state.days.forEach((day) => {
             if ((day.weekIndex === 10 || day.weekIndex === 16) && day.dayOfWeek === 2) {
-                desired[day.date] = levelToCount[4];
+                const commits = [5, 6, 7, 8][Math.floor(Math.random() * 4)];
+                desired[day.date] = commits;
             }
             if (day.weekIndex >= 8 && day.weekIndex <= 18 && day.dayOfWeek === 5) {
-                desired[day.date] = levelToCount[3];
+                const commits = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
             }
             if (day.weekIndex >= 9 && day.weekIndex <= 17 && day.dayOfWeek === 4) {
-                desired[day.date] = levelToCount[2];
+                const commits = [2, 2, 3, 4][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
             }
         });
     }
@@ -922,13 +1033,165 @@ const applyPattern = (pattern) => {
     if (pattern === "blocks") {
         state.days.forEach((day) => {
             if (day.weekIndex >= 2 && day.weekIndex <= 8 && day.dayOfWeek <= 4) {
-                desired[day.date] = levelToCount[4];
+                const commits = [5, 6, 7, 8][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
             }
             if (day.weekIndex >= 18 && day.weekIndex <= 26 && day.dayOfWeek <= 4) {
-                desired[day.date] = levelToCount[3];
+                const commits = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
             }
             if (day.weekIndex >= 34 && day.weekIndex <= 40 && day.dayOfWeek <= 4) {
-                desired[day.date] = levelToCount[2];
+                const commits = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            }
+        });
+    }
+
+    if (pattern === "all") {
+        state.days.forEach((day) => {
+            const current = desired[day.date] || 0;
+            if (day.weekIndex % 7 === day.dayOfWeek) {
+                desired[day.date] = Math.max(current, levelToCount[3]);
+            }
+            const wave = Math.round((Math.sin(day.weekIndex / 4) + 1) * 3);
+            if (day.dayOfWeek === wave) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[4]);
+            }
+            if ((day.weekIndex === 10 || day.weekIndex === 16) && day.dayOfWeek === 2) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[4]);
+            }
+            if (day.weekIndex >= 8 && day.weekIndex <= 18 && day.dayOfWeek === 5) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[3]);
+            }
+            if (day.weekIndex >= 9 && day.weekIndex <= 17 && day.dayOfWeek === 4) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[2]);
+            }
+            if (day.weekIndex >= 2 && day.weekIndex <= 8 && day.dayOfWeek <= 4) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[4]);
+            }
+            if (day.weekIndex >= 18 && day.weekIndex <= 26 && day.dayOfWeek <= 4) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[3]);
+            }
+            if (day.weekIndex >= 34 && day.weekIndex <= 40 && day.dayOfWeek <= 4) {
+                desired[day.date] = Math.max((desired[day.date] || 0), levelToCount[2]);
+            }
+        });
+    }
+
+    if (pattern === "casual") {
+        state.days.forEach((day) => {
+            const isWeekday = day.dayOfWeek > 0 && day.dayOfWeek < 6;
+            const random = Math.random();
+            
+            if (isWeekday && random < 0.6) {
+                const base = Math.floor(Math.random() * 3);
+                const variance = Math.floor(Math.random() * 4);
+                desired[day.date] = Math.max((desired[day.date] || 0), base + variance);
+            } else if (!isWeekday && random < 0.3) {
+                const commits = [0, 0, 1, 1, 2, 3][Math.floor(Math.random() * 6)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            }
+        });
+    }
+
+    if (pattern === "busy") {
+        state.days.forEach((day) => {
+            const isWeekday = day.dayOfWeek > 0 && day.dayOfWeek < 6;
+            if (isWeekday) {
+                const base = 4 + Math.floor(Math.random() * 3);
+                const variance = Math.floor(Math.random() * 4) - 1;
+                const commits = Math.max(1, base + variance);
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            } else {
+                const random = Math.random();
+                if (random < 0.4) {
+                    const commits = [0, 1, 1, 2, 3, 4][Math.floor(Math.random() * 6)];
+                    desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                }
+            }
+        });
+    }
+
+    if (pattern === "organic") {
+        let streak = 0;
+        state.days.forEach((day, index) => {
+            const random = Math.random();
+            const daysSinceStart = index;
+            const momentum = Math.sin(daysSinceStart / 30) * 0.3 + 0.5;
+            const threshold = momentum * 0.7;
+            
+            if (random < threshold) {
+                streak = Math.min(streak + 1, 5);
+                const baseCommits = Math.floor((streak / 5) * 3) + 1;
+                const variance = Math.floor(Math.random() * 3);
+                desired[day.date] = Math.max((desired[day.date] || 0), baseCommits + variance);
+            } else {
+                streak = Math.max(streak - 1, 0);
+                if (random < threshold + 0.15) {
+                    desired[day.date] = Math.max((desired[day.date] || 0), 1);
+                }
+            }
+        });
+    }
+
+    if (pattern === "mild") {
+        state.days.forEach((day) => {
+            const random = Math.random();
+            if (random < 0.25) {
+                const commits = [0, 1, 1, 2, 3][Math.floor(Math.random() * 5)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            } else if (random < 0.35) {
+                desired[day.date] = Math.max((desired[day.date] || 0), Math.floor(Math.random() * 2));
+            }
+        });
+    }
+
+    if (pattern === "intense") {
+        state.days.forEach((day) => {
+            const random = Math.random();
+            if (random < 0.8) {
+                const commits = [5, 3, 2, 14, 7, 2, 2, 2, 1, 4][Math.floor(Math.random() * 10)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            }
+        });
+    }
+
+    if (pattern === "sporadic") {
+        state.days.forEach((day, index) => {
+            const burstStart = Math.floor(Math.random() * 52) * 7;
+            const burstLength = Math.floor(Math.random() * 10) + 3;
+            const dayIndex = day.weekIndex * 7 + day.dayOfWeek;
+            
+            if (dayIndex >= burstStart && dayIndex < burstStart + burstLength) {
+                const commits = [5, 3, 2, 14, 7, 2, 2, 2, 1, 4][Math.floor(Math.random() * 10)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            }
+        });
+    }
+
+    if (pattern === "checkerboard") {
+        state.days.forEach((day) => {
+            if ((day.weekIndex + day.dayOfWeek) % 2 === 0) {
+                const commits = [4, 5, 6, 7][Math.floor(Math.random() * 4)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+            }
+        });
+    }
+
+    if (pattern === "gradient") {
+        state.days.forEach((day) => {
+            const progress = day.weekIndex / 52;
+            const baseLevel = Math.floor(progress * 5);
+            const commits = [1, 2, 3, 4, 5, 6][baseLevel] + Math.floor(Math.random() * 3) - 1;
+            desired[day.date] = Math.max((desired[day.date] || 0), Math.max(1, commits));
+        });
+    }
+
+    if (pattern === "stripes") {
+        state.days.forEach((day) => {
+            if (day.dayOfWeek === 0 || day.dayOfWeek === 6) {
+                const commits = [4, 5, 6, 7, 8][Math.floor(Math.random() * 5)];
+                desired[day.date] = Math.max((desired[day.date] || 0), commits);
             }
         });
     }
@@ -999,6 +1262,10 @@ const loadExisting = async () => {
         return;
     }
 
+    if (state.githubLoaded) {
+        return;
+    }
+
     elements.loadExisting.disabled = true;
     elements.loadExisting.textContent = "Loading...";
 
@@ -1006,15 +1273,13 @@ const loadExisting = async () => {
         if (state.availableYears.length === 0) {
             await loadAvailableYears(token);
         }
-        if (!state.githubLoaded) {
-            state.githubCountsByYear = {};
-            for (const year of state.availableYears) {
-                elements.loadExisting.textContent = `Loading ${year}...`;
-                const counts = await api.loadGithubContribs(token, year);
-                state.githubCountsByYear[year] = counts || {};
-            }
-            state.githubLoaded = true;
+        state.githubCountsByYear = {};
+        for (const year of state.availableYears) {
+            elements.loadExisting.textContent = `Loading ${year}...`;
+            const counts = await api.loadGithubContribs(token, year);
+            state.githubCountsByYear[year] = counts || {};
         }
+        state.githubLoaded = true;
         state.existingCounts = state.githubCountsByYear[state.year] || {};
         state.desiredCounts = { ...state.existingCounts };
         refreshCalendarState();
@@ -1175,8 +1440,51 @@ const init = async () => {
 
     elements.loadExisting.addEventListener("click", loadExisting);
 
+    const patternMenuBtn = document.getElementById("patternMenuBtn");
+    const clearPatternBtn = document.getElementById("clearPatternBtn");
+    const patternMenu = document.getElementById("patternMenu");
+    
+    patternMenuBtn.addEventListener("click", () => {
+        patternMenu.classList.toggle("active");
+    });
+    
+    document.addEventListener("click", (e) => {
+        if (e.target !== patternMenuBtn && !patternMenu.contains(e.target)) {
+            patternMenu.classList.remove("active");
+        }
+    });
+    
+    let selectedPatternButton = null;
+    let selectedCategory = null;
+    
+    clearPatternBtn.addEventListener("click", () => {
+        if (selectedPatternButton) {
+            selectedPatternButton.classList.remove("selected");
+        }
+        selectedPatternButton = null;
+        selectedCategory = null;
+        applyPattern("clear");
+    });
+    
     document.querySelectorAll("[data-pattern]").forEach((button) => {
-        button.addEventListener("click", () => applyPattern(button.dataset.pattern));
+        button.addEventListener("click", () => {
+            const pattern = button.dataset.pattern;
+            
+            if (selectedPatternButton === button) {
+                selectedPatternButton.classList.remove("selected");
+                selectedPatternButton = null;
+                applyPattern("clear");
+            } else {
+                if (selectedPatternButton) {
+                    selectedPatternButton.classList.remove("selected");
+                    applyPattern("clear");
+                }
+                button.classList.add("selected");
+                selectedPatternButton = button;
+                applyPattern(pattern);
+            }
+            patternMenu.classList.remove("active");
+        });
     });
 
     elements.selectedCount.addEventListener("change", (event) => {
