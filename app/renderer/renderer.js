@@ -740,12 +740,21 @@ const renderCalendar = () => {
         const existingLevel = countToLevel(existing);
 
         const cell = document.createElement("div");
+        
+        // In remove mode, show desired level with special styling for marked days
         cell.className = `cell lvl-${desiredLevel}`;
         cell.dataset.date = day.date;
         cell.dataset.existingLevel = String(existingLevel);
         cell.style.gridColumn = `${day.weekIndex + 1}`;
         cell.style.gridRow = `${day.dayOfWeek + 1}`;
-        cell.title = `${formatDateLabel(day.date)}\nExisting: ${existing}\nDesired: ${desired}`;
+        
+        // Add visual indicator for days marked for removal
+        if (state.mode === "remove" && existing > 0 && desired === 0) {
+            cell.style.border = "2px solid #f85149";
+            cell.style.opacity = "0.5";
+        }
+        
+        cell.title = `${formatDateLabel(day.date)}\nExisting: ${existing}\nDesired: ${desired}${state.mode === "remove" && existing > desired ? "\n⚠️ Marked for removal" : ""}`;
 
         if (state.selectedDate === day.date) {
             cell.classList.add("selected");
@@ -926,6 +935,10 @@ const loadExisting = async () => {
             await loadAvailableYears(token);
         }
         state.existingCounts = await api.loadGithubContribs(token, state.year);
+        
+        // Initialize desiredCounts to match existing counts
+        state.desiredCounts = { ...state.existingCounts };
+        
         refreshCalendarState();
         elements.repoMeta.textContent = `Loaded ${state.year} contributions from GitHub profile`;
     } catch (error) {
