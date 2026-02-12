@@ -15,11 +15,12 @@ Design your GitHub contribution history. Create patterns and backdate commits.
 - Click "Generate new token (classic)"
 - Select `repo` and `user` scopes
 - Copy the token
+- **CREATE A RANDOM REPO WITH ANY NAME**
 
 ### 3️⃣ Use the App
 1. Paste your token
 2. Click "Load Repos"
-3. Select a repo and browse to the local folder
+3. Select a repo and browse to the local folder (select the created one and find it in your local folder)
 4. Choose a pattern (or create custom commits)
 5. Click "Run Commits"
 6. Check "Push after run" to upload to GitHub
@@ -37,11 +38,9 @@ Custom: Type text to render as pixel art
 
 ## ⚠️ Important
 - **Local only**: This modifies your local git history
-- **Permanent**: Once pushed to GitHub, hard to undo
-- **Always backup** your repo first
-- Test on a spare repo first
+- **Permanent**: Once pushed to GitHub if you want to delete your graph commits you have to delete the repo
+- Test on a fresh repo always
 
 ---
-For full documentation, see the original repo
-
 Use responsibly! This tool is for creative and legitimate purposes only.
+Made by [losttox](https://github.com/losttox).
