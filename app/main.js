@@ -13,6 +13,7 @@ const createWindow = () => {
         minWidth: 900,
         minHeight: 600,
         backgroundColor: "#0d1117",
+        icon: path.join(__dirname, "..", "images", "logo.png"),
         webPreferences: {
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,

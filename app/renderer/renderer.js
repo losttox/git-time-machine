@@ -1148,8 +1148,7 @@ const applyPattern = (pattern) => {
     if (pattern === "diagonal") {
         state.days.forEach((day) => {
             if (day.weekIndex % 7 === day.dayOfWeek) {
-                const commits = [3, 3, 4, 5, 5, 6, 7][Math.floor(Math.random() * 7)];
-                desired[day.date] = Math.max(desired[day.date] || 0, commits);
+                desired[day.date] = Math.max(desired[day.date] || 0, 5);
             }
         });
     }
@@ -1158,8 +1157,7 @@ const applyPattern = (pattern) => {
         state.days.forEach((day) => {
             const wave = Math.round((Math.sin(day.weekIndex / 4) + 1) * 3);
             if (day.dayOfWeek === wave) {
-                const commits = [4, 5, 5, 6, 7][Math.floor(Math.random() * 5)];
-                desired[day.date] = Math.max(desired[day.date] || 0, commits);
+                desired[day.date] = Math.max(desired[day.date] || 0, 5);
             }
         });
     }
@@ -1167,16 +1165,13 @@ const applyPattern = (pattern) => {
     if (pattern === "smile") {
         state.days.forEach((day) => {
             if ((day.weekIndex === 10 || day.weekIndex === 16) && day.dayOfWeek === 2) {
-                const commits = [5, 6, 7, 8][Math.floor(Math.random() * 4)];
-                desired[day.date] = commits;
+                desired[day.date] = 5;
             }
             if (day.weekIndex >= 8 && day.weekIndex <= 18 && day.dayOfWeek === 5) {
-                const commits = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
             if (day.weekIndex >= 9 && day.weekIndex <= 17 && day.dayOfWeek === 4) {
-                const commits = [2, 2, 3, 4][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
         });
     }
@@ -1184,16 +1179,13 @@ const applyPattern = (pattern) => {
     if (pattern === "blocks") {
         state.days.forEach((day) => {
             if (day.weekIndex >= 2 && day.weekIndex <= 8 && day.dayOfWeek <= 4) {
-                const commits = [5, 6, 7, 8][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
             if (day.weekIndex >= 18 && day.weekIndex <= 26 && day.dayOfWeek <= 4) {
-                const commits = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
             if (day.weekIndex >= 34 && day.weekIndex <= 40 && day.dayOfWeek <= 4) {
-                const commits = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
         });
     }
@@ -1323,8 +1315,7 @@ const applyPattern = (pattern) => {
     if (pattern === "checkerboard") {
         state.days.forEach((day) => {
             if ((day.weekIndex + day.dayOfWeek) % 2 === 0) {
-                const commits = [4, 5, 6, 7][Math.floor(Math.random() * 4)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
         });
     }
@@ -1332,17 +1323,15 @@ const applyPattern = (pattern) => {
     if (pattern === "gradient") {
         state.days.forEach((day) => {
             const progress = day.weekIndex / 52;
-            const baseLevel = Math.floor(progress * 5);
-            const commits = [1, 2, 3, 4, 5, 6][baseLevel] + Math.floor(Math.random() * 3) - 1;
-            desired[day.date] = Math.max((desired[day.date] || 0), Math.max(1, commits));
+            const commitLevel = Math.floor(progress * 5) + 1;
+            desired[day.date] = Math.max((desired[day.date] || 0), commitLevel);
         });
     }
 
     if (pattern === "stripes") {
         state.days.forEach((day) => {
             if (day.dayOfWeek === 0 || day.dayOfWeek === 6) {
-                const commits = [4, 5, 6, 7, 8][Math.floor(Math.random() * 5)];
-                desired[day.date] = Math.max((desired[day.date] || 0), commits);
+                desired[day.date] = Math.max((desired[day.date] || 0), 5);
             }
         });
     }
